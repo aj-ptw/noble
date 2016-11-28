@@ -1,0 +1,39 @@
+environment:
+  matrix:
+    nodejs_version: 4.0
+    nodejs_version: 4.1
+    nodejs_version: 4.2
+    nodejs_version: 5.0
+    nodejs_version: 5.1
+    nodejs_version: 5.2
+    nodejs_version: 5.3
+    nodejs_version: 5.4
+    nodejs_version: 5.5
+    nodejs_version: 7
+platform:
+  - x64
+  - x86
+cache:
+  - node_modules -> package.json
+build: off
+
+version: '{build}'
+
+shallow_clone: true
+
+# copied from https://github.com/octoblu/meshblu-connector-ble-heartrate/blob/master/appveyor.yml
+install:
+  - ps: Install-Product node $env:nodejs_version $env:Platform
+  - node --version
+  - npm --version
+  - node -e "console.log(process.arch);"
+  - FOR /F "delims=" %%a IN ('node -e "console.log(require('./package.json').version)"') DO SET PACKAGE_VERSION=%%~a
+  - SET PATH=C:\Program Files (x86)\MSBuild\12.0\bin\;%PATH%
+  - SET GYP_MSVS_VERSION=2013
+  - if "%PLATFORM%" == "x64" set PATH=C:\Python27-x64;%PATH%
+  - if "%PLATFORM%" == "x86" SET PATH=C:\python27;%PATH%
+  - npm install --build-from-source
+  - SET SKIP_REQUIRE_NOBLE=true
+
+test_script:
+  - npm test
